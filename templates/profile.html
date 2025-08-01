@@ -5,78 +5,128 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      background: #f8f9fa;
       padding: 40px;
     }
-    .profile-card {
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      max-width: 800px;
+    .profile-container {
+      background: #fff;
+      max-width: 850px;
       margin: auto;
+      padding: 30px;
+      border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    h1 {
+    h1, h2 {
       color: #2c3e50;
     }
-    .section {
-      margin-top: 20px;
+    .field-label {
+      font-weight: bold;
+      margin-top: 25px;
+      color: #333;
+    }
+    .value {
+      margin-top: 6px;
+      color: #555;
+    }
+    .skills-list {
+      padding-left: 20px;
+      margin-top: 6px;
+    }
+    iframe, video {
+      margin-top: 10px;
+      border: none;
+      width: 100%;
+      height: 315px;
+    }
+    .resume-section {
+      margin-top: 40px;
     }
     .resume-preview img {
-      max-width: 200px;
-      border: 1px solid #ccc;
+      max-width: 260px;
       margin-top: 10px;
+      border: 1px solid #ccc;
     }
-    .download-button {
+    .download-link {
       display: inline-block;
       margin-top: 10px;
-      padding: 10px 20px;
-      background-color: #3498db;
+      padding: 10px 16px;
+      background: #2d87f0;
       color: white;
       text-decoration: none;
-      border-radius: 5px;
+      border-radius: 6px;
     }
-    ul.skills {
-      padding-left: 20px;
+    .rating-box {
+      font-size: 20px;
+      font-weight: bold;
+      color: #e67e22;
     }
-    .created-time {
+    .footer {
       font-size: 12px;
       color: gray;
-      margin-top: 30px;
+      margin-top: 40px;
+      text-align: right;
     }
   </style>
 </head>
 <body>
-  <div class="profile-card">
+  <div class="profile-container">
     <h1>{{ data['Candidate Name'] }}</h1>
 
-    <p><strong>Email:</strong> {{ data.get('Email Address', 'N/A') }}</p>
-    <p><strong>Skills:</strong> {{ data.get('Skills', 'N/A') }}</p>
-    <p><strong>Days Since Application:</strong> {{ data.get('Days Since Application', 'N/A') }}</p>
+    <div class="field-label">Title</div>
+    <div class="value">{{ data.get('Title', 'N/A') }}</div>
 
+    <div class="field-label">Location</div>
+    <div class="value">{{ data.get('Location', 'N/A') }}</div>
+
+    <div class="field-label">Intro Video</div>
+    {% if data.get('Intro Video Upload') %}
+      <video controls>
+        <source src="{{ data['Intro Video Upload'][0]['url'] }}" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    {% elif data.get('Intro Video') %}
+      <iframe src="{{ data['Intro Video'] }}" allowfullscreen></iframe>
+    {% else %}
+      <div class="value">No intro video provided</div>
+    {% endif %}
+
+    <div class="field-label">Work Experience</div>
+    <div class="value">{{ data.get('Work Experience', 'N/A') }}</div>
+
+    <div class="field-label">Education</div>
+    <div class="value">{{ data.get('Education', 'N/A') }}</div>
+
+    <div class="field-label">Skills</div>
     {% if data.get('Skills List') %}
-    <div class="section">
-      <strong>Skills List:</strong>
-      <ul class="skills">
+      <ul class="skills-list">
         {% for skill in data['Skills List'] %}
           <li>{{ skill }}</li>
         {% endfor %}
       </ul>
-    </div>
-    {% endif %}
-
-    {% if data.get('Resume') %}
-    <div class="section resume-preview">
-      <h3>Resume</h3>
-      <img src="{{ data['Resume'][0]['thumbnails']['large']['url'] }}" alt="Resume Thumbnail"><br>
-      <a class="download-button" href="{{ data['Resume'][0]['url'] }}" target="_blank">📄 Download Resume</a>
-    </div>
     {% else %}
-    <p><em>No resume uploaded.</em></p>
+      <div class="value">{{ data.get('Skills', 'N/A') }}</div>
     {% endif %}
 
-    <div class="created-time">
-      Created on: {{ created_time }}
+    <div class="field-label">Manager Rating</div>
+    <div class="rating-box">{{ data.get('Manager Rating', 'N/A') }} / 5</div>
+
+    <div class="field-label">Feedback / Notes</div>
+    <div class="value">{{ data.get('Feedback', 'No feedback provided.') }}</div>
+
+    <div class="resume-section">
+      <h2>Resume</h2>
+      {% if data.get('Resume') %}
+        <div class="resume-preview">
+          <img src="{{ data['Resume'][0]['thumbnails']['large']['url'] }}" alt="Resume Preview"><br>
+          <a class="download-link" href="{{ data['Resume'][0]['url'] }}" target="_blank">📄 Download Resume</a>
+        </div>
+      {% else %}
+        <div class="value">Resume not available</div>
+      {% endif %}
+    </div>
+
+    <div class="footer">
+      Profile Created: {{ created_time }}
     </div>
   </div>
 </body>
