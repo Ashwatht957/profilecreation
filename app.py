@@ -1,4 +1,4 @@
-from flask import Flask, render_template, abort
+from flask import Flask, render_template, abort,request
 from airtable_config import get_record_by_name, get_all_candidates
 from datetime import datetime
 
@@ -58,6 +58,41 @@ def debug(slug):
     name = deslugify(slug)
     record = get_record_by_name(name)
     return record or {"error": "No record found."}
+
+@app.route('/parse-resume', methods=['POST'])
+def parse_resume():
+    import requests, zipfile, io
+    from airtable_config import update_record
+    from resume_parser import parse_resume_pdf
+
+    data = request.json
+    zip_url = data.get("zip_url")
+    record_id = data.get("record_id")
+
+    if not zip_url or not record_id:
+        return {"error": "Missing zip_url or record_id"}, 400
+
+    try:
+        response = requests.get(zip_url)
+        response.raise_for_status()
+
+        with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+            for file in z.namelist():
+                if file.endswith(".pdf"):
+                    with z.open(file) as pdf_file:
+                        pdf_bytes = pdf_file.read()
+                        parsed_data = parse_resume_pdf(pdf_bytes)
+
+                        # Update Airtable
+                        update_record(record_id, parsed_data)
+
+                        return {"status": "✅ Resume parsed", "parsed_data": parsed_data}, 200
+
+        return {"error": "No PDF found in ZIP"}, 400
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+
 
 if __name__ == '__main__':
     import os
