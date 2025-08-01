@@ -1,24 +1,41 @@
-from PyPDF2 import PdfReader
-import io
 import re
+from PyPDF2 import PdfReader
 
-def parse_resume_pdf(pdf_bytes):
-    reader = PdfReader(io.BytesIO(pdf_bytes))
-    text = ""
-    for page in reader.pages:
-        text += page.extract_text()
-
-    # Basic email + name extraction
-    email = re.search(r'[\w\.-]+@[\w\.-]+', text)
-    name = text.split('\n')[0].strip()  # crude name guess
-
-    skills = []
-    if "python" in text.lower(): skills.append("Python")
-    if "sql" in text.lower(): skills.append("SQL")
-    if "java" in text.lower(): skills.append("Java")
-
-    return {
-        "Candidate Name": name,
-        "Email Address": email.group() if email else "N/A",
-        "Skills": ", ".join(skills) if skills else "N/A"
+def parse_resume_file(file_path):
+    data = {
+        "Candidate Name": "N/A",
+        "Email Address": "N/A",
+        "Skills": "N/A",
+        "Experience": "N/A"
     }
+
+    try:
+        reader = PdfReader(file_path)
+        text = "\n".join([page.extract_text() for page in reader.pages if page.extract_text()])
+
+        # Name
+        name_match = re.search(r'Name[:\s]+(.+)', text, re.I)
+        if name_match:
+            data["Candidate Name"] = name_match.group(1).strip()
+
+        # Email
+        email_match = re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', text)
+        if email_match:
+            data["Email Address"] = email_match.group(0)
+
+        # Skills (demo logic, improve later)
+        skills = []
+        for skill in ["Python", "Java", "SQL", "Excel", "JavaScript"]:
+            if skill.lower() in text.lower():
+                skills.append(skill)
+        data["Skills"] = ", ".join(skills) if skills else "N/A"
+
+        # Experience (simple years logic)
+        exp_match = re.search(r'(\d+)\+?\s+years? experience', text, re.I)
+        if exp_match:
+            data["Experience"] = exp_match.group(1) + " years"
+
+    except Exception as e:
+        print(f"Resume parsing error: {e}")
+
+    return data

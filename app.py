@@ -92,6 +92,55 @@ def parse_resume():
 
     except Exception as e:
         return {"error": str(e)}, 500
+    import os
+import requests
+import tempfile
+import zipfile
+from flask import request, jsonify
+from airtable_config import update_record
+from resume_parser import parse_resume_file  # We'll create this too
+
+@app.route('/parse-resume', methods=['POST'])
+def parse_resume():
+    data = request.json
+    zip_url = data.get("zip_url")
+    record_id = data.get("record_id")
+
+    if not zip_url or not record_id:
+        return jsonify({"error": "Missing zip_url or record_id"}), 400
+
+    try:
+        # Step 1: Download ZIP
+        zip_resp = requests.get(zip_url)
+        zip_resp.raise_for_status()
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_zip:
+            tmp_zip.write(zip_resp.content)
+            zip_path = tmp_zip.name
+
+        # Step 2: Extract ZIP
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(tempfile.gettempdir())
+            resume_files = zip_ref.namelist()
+
+        if not resume_files:
+            return jsonify({"error": "No file found in ZIP"}), 400
+
+        # Step 3: Parse first file (assuming 1 resume in ZIP)
+        resume_path = os.path.join(tempfile.gettempdir(), resume_files[0])
+        parsed_data = parse_resume_file(resume_path)
+
+        # Step 4: Update Airtable record
+        update_record(record_id, parsed_data)
+
+        return jsonify({
+            "message": "Resume parsed and Airtable record updated",
+            "parsed_data": parsed_data
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 
 if __name__ == '__main__':
