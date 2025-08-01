@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ data['Candidate Name'] }} | Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 40px;
+    }
+    .profile-card {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 800px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    .section {
+      margin-top: 20px;
+    }
+    .resume-preview img {
+      max-width: 200px;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+    }
+    .download-button {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+    ul.skills {
+      padding-left: 20px;
+    }
+    .created-time {
+      font-size: 12px;
+      color: gray;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-card">
+    <h1>{{ data['Candidate Name'] }}</h1>
+
+    <p><strong>Email:</strong> {{ data.get('Email Address', 'N/A') }}</p>
+    <p><strong>Skills:</strong> {{ data.get('Skills', 'N/A') }}</p>
+    <p><strong>Days Since Application:</strong> {{ data.get('Days Since Application', 'N/A') }}</p>
+
+    {% if data.get('Skills List') %}
+    <div class="section">
+      <strong>Skills List:</strong>
+      <ul class="skills">
+        {% for skill in data['Skills List'] %}
+          <li>{{ skill }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    {% if data.get('Resume') %}
+    <div class="section resume-preview">
+      <h3>Resume</h3>
+      <img src="{{ data['Resume'][0]['thumbnails']['large']['url'] }}" alt="Resume Thumbnail"><br>
+      <a class="download-button" href="{{ data['Resume'][0]['url'] }}" target="_blank">📄 Download Resume</a>
+    </div>
+    {% else %}
+    <p><em>No resume uploaded.</em></p>
+    {% endif %}
+
+    <div class="created-time">
+      Created on: {{ created_time }}
+    </div>
+  </div>
+</body>
+</html>
