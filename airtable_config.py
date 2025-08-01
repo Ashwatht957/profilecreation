@@ -20,11 +20,10 @@ def get_record_by_name(name):
     records = table.all(formula=formula)
     return records[0] if records else None
 
-def update_record(record_id, fields_dict):
-    table = Table(AIRTABLE_API_KEY, BASE_ID, TABLE_NAME)
+# Update a record using record ID and field dictionary
+def update_record_fields(record_id, fields_dict):
+    table = get_table()
     table.update(record_id, fields_dict)
-
-
 
 # Fetch all candidate records
 def get_all_candidates():
