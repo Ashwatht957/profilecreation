@@ -3,101 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>All Candidate Profiles</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      padding: 40px 20px;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    .container {
-      background: #ffffff;
-      padding: 40px;
-      border-radius: 12px;
-      max-width: 720px;
-      margin: auto;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    }
-
-    h1 {
-      color: #2c3e50;
-      margin-bottom: 24px;
-      font-size: 28px;
-      border-bottom: 2px solid #ddd;
-      padding-bottom: 10px;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    li {
-      padding: 16px 0;
-      border-bottom: 1px solid #eee;
-    }
-
-    a {
-      color: #0061f2;
-      text-decoration: none;
-      font-size: 18px;
-      transition: color 0.2s ease;
-    }
-
-    a:hover {
-      color: #003c9e;
-      text-decoration: underline;
-    }
-
-    .empty {
-      color: #666;
-      font-style: italic;
-    }
-
-    .footer {
-      text-align: center;
-      margin-top: auto;
-      font-size: 13px;
-      padding: 20px;
-      color: #888;
-    }
-
-    @media (max-width: 600px) {
-      .container {
-        padding: 25px;
-      }
-
-      h1 {
-        font-size: 24px;
-      }
-
-      a {
-        font-size: 16px;
-      }
-    }
-  </style>
+  <title>Candidate Directory | Talent Profiles</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="container">
-    <h1>Candidate Profiles</h1>
-    {% if candidates %}
-      <ul>
-        {% for candidate in candidates %}
-          <li><a href="/profile/{{ candidate.slug }}">{{ candidate.name }}</a></li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p class="empty">No candidates found.</p>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Main Container -->
+  <div class="max-w-5xl mx-auto px-4 py-10">
+
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <h1 class="text-4xl font-extrabold text-gray-800">Candidate Directory</h1>
+      <p class="text-gray-500 mt-2 text-sm">Explore candidate profiles and view their credentials.</p>
+    </div>
+
+    <!-- Candidate Cards -->
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {% for candidate in candidates %}
+      <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition p-6">
+        <div class="flex items-center space-x-4 mb-4">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xl font-semibold">
+              {{ candidate.name[0] }}
+            </div>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-800">{{ candidate.name }}</h2>
+            <p class="text-sm text-gray-500">Candidate Profile</p>
+          </div>
+        </div>
+        <div class="mt-4">
+          <a href="/profile/{{ candidate.slug }}"
+             class="inline-block bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700 transition">
+            View Profile →
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- No Candidates Message -->
+    {% if not candidates %}
+      <p class="text-center text-gray-500 mt-10">No candidate profiles available at this time.</p>
     {% endif %}
-  </div>
-  <div class="footer">
-    © {{ current_year }} Candidate Profile Viewer. All rights reserved.
+
+    <!-- Footer -->
+    <footer class="text-gray-400 text-xs text-center mt-16">
+      &copy; {{ current_year }} TalentHub. All rights reserved.
+    </footer>
+
   </div>
 </body>
 </html>

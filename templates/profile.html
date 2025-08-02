@@ -1,159 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>{{ data['Candidate Name'] }} | Profile</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 40px 20px;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    .profile-container {
-      background: #fff;
-      max-width: 900px;
-      margin: auto;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-    }
-
-    h1 {
-      color: #2c3e50;
-      font-size: 28px;
-      border-bottom: 2px solid #ddd;
-      padding-bottom: 12px;
-    }
-
-    .field-label {
-      font-weight: bold;
-      margin-top: 25px;
-      color: #333;
-    }
-
-    .value {
-      margin-top: 6px;
-      color: #555;
-    }
-
-    .skills-list {
-      padding-left: 20px;
-      margin-top: 6px;
-    }
-
-    iframe, video {
-      margin-top: 10px;
-      border: none;
-      width: 100%;
-      height: 315px;
-    }
-
-    .resume-section {
-      margin-top: 40px;
-    }
-
-    .resume-preview img {
-      max-width: 260px;
-      margin-top: 10px;
-      border: 1px solid #ccc;
-    }
-
-    .download-link {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 10px 16px;
-      background: #2d87f0;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-    }
-
-    .download-link:hover {
-      background: #1c64d1;
-    }
-
-    .rating-box {
-      font-size: 20px;
-      font-weight: bold;
-      color: #e67e22;
-    }
-
-    .footer {
-      font-size: 13px;
-      color: gray;
-      margin-top: auto;
-      text-align: center;
-      padding: 20px;
-    }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="profile-container">
-    <h1>{{ data['Candidate Name'] }}</h1>
+<body class="bg-gray-100 p-6">
+  <div class="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6 max-w-7xl mx-auto">
 
-    <div class="field-label">Title</div>
-    <div class="value">{{ data.get('Title', 'N/A') }}</div>
+    <!-- Sidebar -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <div class="flex flex-col items-center space-y-4">
+        <img class="w-24 h-24 rounded-full object-cover" src="{{ data.get('Avatar', ['/default.jpg'])[0] }}" alt="Candidate">
+        <h2 class="text-xl font-bold text-center">{{ data['Candidate Name'] }}</h2>
+        <p class="text-sm text-gray-500">{{ data.get('Title', 'N/A') }}</p>
+        <p class="text-sm">{{ data.get('Location', 'N/A') }}</p>
 
-    <div class="field-label">Location</div>
-    <div class="value">{{ data.get('Location', 'N/A') }}</div>
-
-    <div class="field-label">Intro Video</div>
-    {% if data.get('Intro Video Upload') %}
-      <video controls>
-        <source src="{{ data['Intro Video Upload'][0]['url'] }}" type="video/mp4">
-        Your browser does not support the video tag.
-      </video>
-    {% elif data.get('Intro Video') %}
-      <iframe src="{{ data['Intro Video'] }}" allowfullscreen></iframe>
-    {% else %}
-      <div class="value">No intro video provided</div>
-    {% endif %}
-
-    <div class="field-label">Work Experience</div>
-    <div class="value">{{ data.get('Work Experience', 'N/A') }}</div>
-
-    <div class="field-label">Education</div>
-    <div class="value">{{ data.get('Education', 'N/A') }}</div>
-
-    <div class="field-label">Skills</div>
-    {% if data.get('Skills List') %}
-      <ul class="skills-list">
-        {% for skill in data['Skills List'] %}
-          <li>{{ skill }}</li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <div class="value">{{ data.get('Skills', 'N/A') }}</div>
-    {% endif %}
-
-    <div class="field-label">Manager Rating</div>
-    <div class="rating-box">{{ data.get('Manager Rating', 'N/A') }} / 5</div>
-
-    <div class="field-label">Feedback / Notes</div>
-    <div class="value">{{ data.get('Feedback', 'No feedback provided.') }}</div>
-
-    <div class="resume-section">
-      <h2>Resume</h2>
-      {% if data.get('Resume') %}
-        <div class="resume-preview">
-          <img src="{{ data['Resume'][0]['thumbnails']['large']['url'] }}" alt="Resume Preview"><br>
-          <a class="download-link" href="{{ data['Resume'][0]['url'] }}" target="_blank">📄 Download Resume</a>
+        <!-- Manager Rating -->
+        <div class="mt-4 w-full">
+          <label class="block text-sm font-medium mb-1">Manager Rating</label>
+          <select class="w-full border rounded px-2 py-1 text-sm">
+            <option value="">Select rating</option>
+            <option>⭐ Strong Fit</option>
+            <option>✅ Good Fit</option>
+            <option>🟡 Neutral</option>
+            <option>🔻 Weak Fit</option>
+          </select>
         </div>
-      {% else %}
-        <div class="value">Resume not available</div>
-      {% endif %}
+
+        <div class="w-full flex flex-col space-y-2 mt-6">
+          <a href="#" class="bg-gray-100 hover:bg-gray-200 text-center py-2 rounded text-sm">💬 Message</a>
+          <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white text-center py-2 rounded text-sm">📅 Schedule Interview</a>
+        </div>
+
+        <div class="mt-6 text-sm space-y-2 w-full">
+          <div>
+            <strong>Experience:</strong>
+            <p>{{ data.get('Work Experience', 'N/A') }}</p>
+          </div>
+          <div>
+            <strong>Preferred Role:</strong>
+            <p>{{ data.get('Preferred Role', 'N/A') }}</p>
+          </div>
+          <div>
+            <strong>Skills:</strong>
+            <p>{{ data.get('Skills', 'N/A') }}</p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="footer">
-      Profile Created: {{ created_time }} <br>
-      © {{ current_year }} Candidate Profile Viewer. All rights reserved.
+    <!-- Main Tabs -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <div>
+        <ul class="flex space-x-4 border-b mb-6">
+          <li><a href="#tab-profile" class="tab-link font-medium text-blue-600">Profile</a></li>
+          <li><a href="#tab-video" class="tab-link text-gray-600">Intro Video</a></li>
+          <li><a href="#tab-availability" class="tab-link text-gray-600">Availability</a></li>
+          <li><a href="#tab-feedback" class="tab-link text-gray-600">Feedback</a></li>
+        </ul>
+
+        <!-- Profile Tab -->
+        <div id="tab-profile" class="tab-content block space-y-6">
+          <div>
+            <h3 class="text-lg font-semibold mb-2">Work Experience</h3>
+            <p>{{ data.get('Work Experience', 'N/A') }}</p>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold mb-2">Education</h3>
+            <p>{{ data.get('Education', 'N/A') }}</p>
+          </div>
+        </div>
+
+        <!-- Intro Video Tab -->
+        <div id="tab-video" class="tab-content hidden">
+          {% if data.get('Intro Video Upload') %}
+            <video controls class="w-full rounded-md">
+              <source src="{{ data['Intro Video Upload'][0]['url'] }}" type="video/mp4">
+            </video>
+          {% elif data.get('Intro Video') %}
+            <iframe src="{{ data['Intro Video'] }}" class="w-full h-80 rounded-md" allowfullscreen></iframe>
+          {% else %}
+            <p>No intro video provided.</p>
+          {% endif %}
+        </div>
+
+        <!-- Availability Tab -->
+        <div id="tab-availability" class="tab-content hidden">
+          <iframe src="{{ data.get('Calendly Link', 'https://calendly.com') }}" class="w-full h-96 rounded-md"></iframe>
+        </div>
+
+        <!-- Feedback Tab -->
+        <div id="tab-feedback" class="tab-content hidden">
+          <textarea class="w-full p-3 border rounded-md" placeholder="Write your feedback here..."></textarea>
+          <button class="mt-2 px-4 py-2 bg-blue-600 text-white rounded">Submit</button>
+        </div>
+      </div>
     </div>
   </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab-link');
+    const contents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', e => {
+        e.preventDefault();
+        tabs.forEach(t => t.classList.remove('text-blue-600', 'font-medium'));
+        contents.forEach(c => c.classList.add('hidden'));
+        tab.classList.add('text-blue-600', 'font-medium');
+        document.querySelector(tab.getAttribute('href')).classList.remove('hidden');
+      });
+    });
+  </script>
 </body>
 </html>
