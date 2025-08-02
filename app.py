@@ -1,16 +1,20 @@
 import os
+import re
 import requests
 import zipfile
 import tempfile
 from flask import Flask, request, render_template, abort, jsonify
-from airtable_config import get_record_by_name, get_all_candidates, update_record_fields
 from dotenv import load_dotenv
+from PyPDF2 import PdfReader
+
+from airtable_config import get_record_by_name, get_all_candidates, update_record_fields
 
 # Load environment variables from .env
 load_dotenv()
 
 app = Flask(__name__)
 
+# Helper functions
 def slugify(name):
     return name.strip().lower().replace(" ", "-")
 
@@ -47,14 +51,14 @@ def profile(slug):
     created_time = record.get("createdTime", "Unknown")
     return render_template("profile.html", data=data, created_time=created_time)
 
-# Debug endpoint for testing a specific record
+# Debug endpoint
 @app.route('/debug/<slug>')
 def debug(slug):
     name = deslugify(slug)
     record = get_record_by_name(name)
     return record or {"error": "No record found."}
 
-# Webhook endpoint for Make.com to parse resume from uploaded ZIP
+# Resume parsing endpoint
 @app.route('/parse-resume', methods=['POST'])
 def parse_resume():
     data = request.get_json()
@@ -71,6 +75,7 @@ def parse_resume():
             if response.status_code != 200:
                 return jsonify({"error": "Failed to download ZIP file"}), 400
 
+            # Save and extract ZIP
             with open(zip_path, 'wb') as f:
                 f.write(response.content)
 
@@ -83,11 +88,28 @@ def parse_resume():
 
             extracted_path = os.path.join(tmpdir, resume_file)
 
-            # Replace this with real parsing logic later
+            # Extract text
+            if resume_file.endswith(".pdf"):
+                with open(extracted_path, "rb") as f:
+                    reader = PdfReader(f)
+                    parsed_text = " ".join(page.extract_text() or "" for page in reader.pages)
+            elif resume_file.endswith(".txt"):
+                with open(extracted_path, "r", encoding="utf-8") as f:
+                    parsed_text = f.read()
+            else:
+                return jsonify({"error": "Unsupported file format"}), 400
+
+            # Extract email
+            email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', parsed_text)
+            email = email_match.group(0) if email_match else "not_found@example.com"
+
+            # Dummy logic for name detection
+            name = "Pratham Koparde" if "Pratham" in parsed_text else "Unknown"
+
             parsed_data = {
-                "Candidate Name": "Parsed Name",
-                "Email Address": "parsed@example.com",
-                "Skills": "Python, Flask, REST APIs"
+                "Candidate Name": name,
+                "Email Address": email,
+                "Skills": "Python, Flask" if "Python" in parsed_text else "N/A"
             }
 
             update_record_fields(record_id, parsed_data)
@@ -97,8 +119,16 @@ def parse_resume():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# List all record IDs and names
+@app.route('/list-records')
+def list_records():
+    records = get_all_candidates()
+    return jsonify([
+        {"id": r["id"], "name": r.get("fields", {}).get("Candidate Name", "No Name")}
+        for r in records
+    ])
 
-
+# Run server
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=True, host="0.0.0.0", port=port)
