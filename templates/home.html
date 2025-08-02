@@ -1,36 +1,85 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>All Candidate Profiles</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f0f0;
-      padding: 40px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
+
     .container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      max-width: 700px;
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 12px;
+      max-width: 720px;
       margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
     }
+
     h1 {
       color: #2c3e50;
+      margin-bottom: 24px;
+      font-size: 28px;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 10px;
     }
+
     ul {
-      list-style-type: none;
+      list-style: none;
       padding: 0;
+      margin: 0;
     }
+
     li {
-      padding: 12px 0;
+      padding: 16px 0;
       border-bottom: 1px solid #eee;
     }
+
     a {
-      color: #2980b9;
+      color: #0061f2;
       text-decoration: none;
       font-size: 18px;
+      transition: color 0.2s ease;
+    }
+
+    a:hover {
+      color: #003c9e;
+      text-decoration: underline;
+    }
+
+    .empty {
+      color: #666;
+      font-style: italic;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: auto;
+      font-size: 13px;
+      padding: 20px;
+      color: #888;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 25px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      a {
+        font-size: 16px;
+      }
     }
   </style>
 </head>
@@ -44,8 +93,11 @@
         {% endfor %}
       </ul>
     {% else %}
-      <p>No candidates found.</p>
+      <p class="empty">No candidates found.</p>
     {% endif %}
+  </div>
+  <div class="footer">
+    © {{ current_year }} Candidate Profile Viewer. All rights reserved.
   </div>
 </body>
 </html>

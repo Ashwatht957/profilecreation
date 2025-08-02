@@ -3,25 +3,37 @@ import re
 import requests
 import zipfile
 import tempfile
+from datetime import datetime
 from flask import Flask, request, render_template, abort, jsonify
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 
 from airtable_config import get_record_by_name, get_all_candidates, update_record_fields
 
-# Load environment variables from .env
+# Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
 
+# --------------------------
+# Global Jinja variable: current_year
+# --------------------------
+@app.context_processor
+def inject_current_year():
+    return {'current_year': datetime.now().year}
+
+# --------------------------
 # Helper functions
+# --------------------------
 def slugify(name):
     return name.strip().lower().replace(" ", "-")
 
 def deslugify(slug):
     return slug.replace("-", " ").title()
 
-# Home page — list all candidates
+# --------------------------
+# Home route
+# --------------------------
 @app.route('/')
 def home():
     records = get_all_candidates()
@@ -38,7 +50,9 @@ def home():
 
     return render_template("home.html", candidates=candidates)
 
-# Candidate profile page
+# --------------------------
+# Profile route
+# --------------------------
 @app.route('/profile/<slug>')
 def profile(slug):
     name = deslugify(slug)
@@ -49,16 +63,21 @@ def profile(slug):
 
     data = record.get("fields", {})
     created_time = record.get("createdTime", "Unknown")
+
     return render_template("profile.html", data=data, created_time=created_time)
 
-# Debug endpoint
+# --------------------------
+# Debug route (optional)
+# --------------------------
 @app.route('/debug/<slug>')
 def debug(slug):
     name = deslugify(slug)
     record = get_record_by_name(name)
     return record or {"error": "No record found."}
 
+# --------------------------
 # Resume parsing endpoint
+# --------------------------
 @app.route('/parse-resume', methods=['POST'])
 def parse_resume():
     data = request.get_json()
@@ -88,7 +107,7 @@ def parse_resume():
 
             extracted_path = os.path.join(tmpdir, resume_file)
 
-            # Extract text
+            # Read and extract text
             if resume_file.endswith(".pdf"):
                 with open(extracted_path, "rb") as f:
                     reader = PdfReader(f)
@@ -103,7 +122,7 @@ def parse_resume():
             email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', parsed_text)
             email = email_match.group(0) if email_match else "not_found@example.com"
 
-            # Dummy logic for name detection
+            # Dummy name logic
             name = "Pratham Koparde" if "Pratham" in parsed_text else "Unknown"
 
             parsed_data = {
@@ -119,7 +138,9 @@ def parse_resume():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# List all record IDs and names
+# --------------------------
+# List Airtable record IDs
+# --------------------------
 @app.route('/list-records')
 def list_records():
     records = get_all_candidates()
@@ -128,7 +149,9 @@ def list_records():
         for r in records
     ])
 
-# Run server
+# --------------------------
+# Run the Flask app
+# --------------------------
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=True, host="0.0.0.0", port=port)
